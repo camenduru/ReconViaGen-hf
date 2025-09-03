@@ -336,7 +336,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         """Lazy loading of the BiRefNet model"""
         from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation, AutoModelForImageSegmentation
         self.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
-            'weights/BiRefNet',
+            'ZhengPeng7/BiRefNet',
             trust_remote_code=True
         ).to(self.device)
         self.birefnet_model.eval()
