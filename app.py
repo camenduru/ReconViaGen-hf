@@ -386,7 +386,10 @@ with demo:
         inputs=[input_video],
         outputs=[multiimage_prompt],
     )
-
+    input_video.clear(
+        lambda: tuple([None, None]),
+        outputs=[input_video, multiimage_prompt],
+    )
     multiimage_prompt.upload(
         preprocess_images,
         inputs=[multiimage_prompt],
@@ -431,8 +434,4 @@ if __name__ == "__main__":
     pipeline = TrellisVGGTTo3DPipeline.from_pretrained("Stable-X/trellis-vggt-v0-1")
     pipeline.cuda()
     pipeline.VGGT_model.cuda()
-    try:
-        pipeline.preprocess_image(Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8)))    # Preload rembg
-    except:
-        pass
-    demo.launch(share=True)
+    demo.launch()
