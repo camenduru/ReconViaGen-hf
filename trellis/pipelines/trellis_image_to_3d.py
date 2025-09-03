@@ -230,11 +230,7 @@ class TrellisImageTo3DPipeline(Pipeline):
             scale = min(1, 1024 / max_size)
             if scale < 1:
                 input = input.resize((int(input.width * scale), int(input.height * scale)), Image.Resampling.LANCZOS)
-            
-            # Load BiRefNet model if not already loaded
-            if getattr(self, 'birefnet_model', None) is None:
-                self._lazy_load_birefnet()
-            
+                        
             # Get mask using BiRefNet
             mask = self._get_birefnet_mask(input)
             
