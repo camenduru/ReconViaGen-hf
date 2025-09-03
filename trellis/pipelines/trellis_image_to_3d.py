@@ -18,6 +18,7 @@ sys.path.append("wheels/vggt")
 from wheels.vggt.vggt.models.vggt import VGGT
 from typing import *
 from scipy.spatial.transform import Rotation
+from transformers import AutoModelForImageSegmentation
 
 def export_point_cloud(xyz, color):
     # Convert tensors to numpy arrays if needed
@@ -327,15 +328,6 @@ class TrellisImageTo3DPipeline(Pipeline):
         output = Image.fromarray((output * 255).astype(np.uint8), mode='RGBA')
         
         return output
-
-    def _lazy_load_birefnet(self):
-        """Lazy loading of the BiRefNet model"""
-        from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation, AutoModelForImageSegmentation
-        self.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
-            'ZhengPeng7/BiRefNet',
-            trust_remote_code=True
-        ).to(self.device)
-        self.birefnet_model.eval()
 
     def _get_birefnet_mask(self, image: Image.Image) -> np.ndarray:
         """Get object mask using BiRefNet"""
@@ -823,7 +815,6 @@ class TrellisVGGTTo3DPipeline(TrellisImageTo3DPipeline):
         del new_pipeline.VGGT_model.point_head
         new_pipeline.VGGT_model.eval()
 
-        from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation, AutoModelForImageSegmentation
         new_pipeline.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
             'ZhengPeng7/BiRefNet',
             trust_remote_code=True
