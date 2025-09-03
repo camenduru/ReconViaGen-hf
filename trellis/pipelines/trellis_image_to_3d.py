@@ -338,7 +338,7 @@ class TrellisImageTo3DPipeline(Pipeline):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         
-        input_images = transform_image(image).unsqueeze(0).to(self.device)
+        input_images = transform_image(image).unsqueeze(0).cpu()
         
         with torch.no_grad():
             preds = self.birefnet_model(input_images)[-1].sigmoid().cpu()
@@ -818,7 +818,7 @@ class TrellisVGGTTo3DPipeline(TrellisImageTo3DPipeline):
         new_pipeline.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
             'ZhengPeng7/BiRefNet',
             trust_remote_code=True
-        ).to(new_pipeline.device)
+        ).cpu()
         new_pipeline.birefnet_model.eval()
         
         new_pipeline.sparse_structure_sampler = getattr(samplers, args['sparse_structure_sampler']['name'])(**args['sparse_structure_sampler']['args'])
