@@ -826,6 +826,13 @@ class TrellisVGGTTo3DPipeline(TrellisImageTo3DPipeline):
         del new_pipeline.VGGT_model.camera_head
         del new_pipeline.VGGT_model.point_head
         new_pipeline.VGGT_model.eval()
+
+        from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation, AutoModelForImageSegmentation
+        new_pipeline.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
+            'ZhengPeng7/BiRefNet',
+            trust_remote_code=True
+        ).to(new_pipeline.device)
+        new_pipeline.birefnet_model.eval()
         
         new_pipeline.sparse_structure_sampler = getattr(samplers, args['sparse_structure_sampler']['name'])(**args['sparse_structure_sampler']['args'])
         new_pipeline.sparse_structure_sampler_params = args['sparse_structure_sampler']['params']
