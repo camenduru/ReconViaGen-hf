@@ -433,7 +433,6 @@ if __name__ == "__main__":
     pipeline = TrellisVGGTTo3DPipeline.from_pretrained("Stable-X/trellis-vggt-v0-1")
     pipeline.cuda()
     pipeline.VGGT_model.cuda()
-    pipeline.birefnet_model.cuda()
     try:
         pipeline.preprocess_image(Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8)))    # Preload rembg
     except:
