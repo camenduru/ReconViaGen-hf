@@ -343,10 +343,10 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
         inputs=[randomize_seed, seed],
         outputs=[seed],
     ).then(
-        lambda: [None, None, None, None],  # 先清空 video_output
-        inputs=[],
-        outputs=[video_output, model_output, download_glb, download_gs],
-    ).then(
+    #     lambda: [None, None, None, None],  # 先清空 video_output
+    #     inputs=[],
+    #     outputs=[video_output, model_output, download_glb, download_gs],
+    # ).then(
         generate_and_extract_glb,
         inputs=[multiimage_prompt, seed, ss_guidance_strength, ss_sampling_steps, slat_guidance_strength, slat_sampling_steps, multiimage_algo, mesh_simplify, texture_size],
         outputs=[output_buf, video_output, model_output, download_glb],
