@@ -381,8 +381,7 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
 
 # Launch the Gradio app
 if __name__ == "__main__":
-    pipeline = TrellisVGGTTo3DPipeline.from_pretrained("weights/trellis-vggt-v0-1")
-    # pipeline = TrellisVGGTTo3DPipeline.from_pretrained("Stable-X/trellis-vggt-v0-1")
+    pipeline = TrellisVGGTTo3DPipeline.from_pretrained("Stable-X/trellis-vggt-v0-1")
     pipeline.cuda()
     pipeline.VGGT_model.cuda()
     try:
