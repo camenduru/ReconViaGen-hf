@@ -18,9 +18,7 @@ from trellis.utils import render_utils, postprocessing_utils
 
 
 MAX_SEED = np.iinfo(np.int32).max
-# TMP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp')
-TMP_DIR = "tmp/Trellis-demo"
-os.environ['GRADIO_TEMP_DIR'] = 'tmp'
+TMP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp')
 os.makedirs(TMP_DIR, exist_ok=True)
 
 def start_session(req: gr.Request):
