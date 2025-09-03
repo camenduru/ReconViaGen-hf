@@ -281,8 +281,6 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
                     multiimage_prompt = gr.Gallery(label="Image Prompt", format="png", type="pil", height=300, columns=3)
                     gr.Markdown("""
                         Input different views of the object in separate images. 
-                        
-                        *NOTE: this is an experimental algorithm without training a specialized model. It may not produce the best results for all images, especially those having different poses or inconsistent details.*
                     """)
         
             with gr.Accordion(label="Generation Settings", open=False):
