@@ -122,7 +122,7 @@ def get_seed(randomize_seed: bool, seed: int) -> int:
     return np.random.randint(0, MAX_SEED) if randomize_seed else seed
 
 
-@spaces.GPU(duration=120)
+@spaces.GPU
 def generate_and_extract_glb(
     multiimages: List[Tuple[Image.Image, str]],
     seed: int,
@@ -386,4 +386,4 @@ if __name__ == "__main__":
         pipeline.preprocess_image(Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8)))    # Preload rembg
     except:
         pass
-    demo.launch()
+    demo.launch(share=True)
