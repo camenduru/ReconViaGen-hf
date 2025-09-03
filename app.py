@@ -19,6 +19,8 @@ from trellis.utils import render_utils, postprocessing_utils
 
 MAX_SEED = np.iinfo(np.int32).max
 TMP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp')
+# TMP_DIR = "tmp/Trellis-demo"
+# os.environ['GRADIO_TEMP_DIR'] = 'tmp'
 os.makedirs(TMP_DIR, exist_ok=True)
 
 def start_session(req: gr.Request):
@@ -29,8 +31,6 @@ def start_session(req: gr.Request):
 def end_session(req: gr.Request):
     user_dir = os.path.join(TMP_DIR, str(req.session_hash))
     shutil.rmtree(user_dir)
-
-@spaces.GPU
 def preprocess_image(image: Image.Image) -> Image.Image:
     """
     Preprocess the input image for 3D generation.
@@ -48,7 +48,33 @@ def preprocess_image(image: Image.Image) -> Image.Image:
     processed_image = pipeline.preprocess_image(image)
     return processed_image
 
-@spaces.GPU
+def preprocess_videos(video: str) -> List[Tuple[Image.Image, str]]:
+    """
+    Preprocess the input video for multi-image 3D generation.
+    
+    This function is called when a user uploads a video.
+    It extracts frames from the video and processes each frame to prepare them
+    for the multi-image 3D generation pipeline.
+    
+    Args:
+        video (str): The path to the input video file
+        
+    Returns:
+        List[Tuple[Image.Image, str]]: The list of preprocessed images ready for 3D generation
+    """
+    vid = imageio.get_reader(video, 'ffmpeg')
+    fps = vid.get_meta_data()['fps']
+    images = []
+    for i, frame in enumerate(vid):
+        if i % max(int(fps * 1), 1) == 0:
+            img = Image.fromarray(frame)
+            W, H = img.size
+            img = img.resize((int(W / H * 512), 512))
+            images.append(img)
+    vid.close()
+    processed_images = [pipeline.preprocess_image(image) for image in images]
+    return processed_images
+
 def preprocess_images(images: List[Tuple[Image.Image, str]]) -> List[Image.Image]:
     """
     Preprocess a list of input images for multi-image 3D generation.
@@ -124,7 +150,7 @@ def get_seed(randomize_seed: bool, seed: int) -> int:
     return np.random.randint(0, MAX_SEED) if randomize_seed else seed
 
 
-@spaces.GPU
+@spaces.GPU(duration=120)
 def generate_and_extract_glb(
     multiimages: List[Tuple[Image.Image, str]],
     seed: int,
@@ -264,13 +290,31 @@ def split_image(image: Image.Image) -> List[Image.Image]:
         images.append(Image.fromarray(image[:, s:e+1]))
     return [preprocess_image(image) for image in images]
 
-
-with gr.Blocks(delete_cache=(600, 600)) as demo:
+# Create interface
+demo = gr.Blocks(
+    title="ReconViaGen",
+    css="""
+        .slider .inner { width: 5px; background: #FFF; }
+        .viewport { aspect-ratio: 4/3; }
+        .tabs button.selected { font-size: 20px !important; color: crimson !important; }
+        h1, h2, h3 { text-align: center; display: block; }
+        .md_feedback li { margin-bottom: 0px !important; }
+    """
+)
+with demo:
     gr.Markdown("""
-    ## Multi-view images to 3D Asset with [ReconViaGen](https://jiahao620.github.io/reconviagen/)
-    * Upload an image and click "Generate & Extract GLB" to create a 3D asset and automatically extract the GLB file.
-    * If you want the Gaussian file as well, click "Extract Gaussian" after generation.
-    * If the image has alpha channel, it will be used as the mask. Otherwise, we use `rembg` to remove the background.
+    # 💻 ReconViaGen
+    <p align="center">
+    <a title="Github" href="https://github.com/GAP-LAB-CUHK-SZ/ReconViaGen" target="_blank" rel="noopener noreferrer" style="display: inline-block;">
+        <img src="https://img.shields.io/github/stars/GAP-LAB-CUHK-SZ/ReconViaGen?label=GitHub%20%E2%98%85&logo=github&color=C8C" alt="badge-github-stars">
+    </a>
+    <a title="Website" href="https://jiahao620.github.io/reconviagen/" target="_blank" rel="noopener noreferrer" style="display: inline-block;">
+        <img src="https://www.obukhov.ai/img/badges/badge-website.svg">
+    </a>
+    <a title="arXiv" href="https://jiahao620.github.io/reconviagen/" target="_blank" rel="noopener noreferrer" style="display: inline-block;">
+        <img src="https://www.obukhov.ai/img/badges/badge-pdf.svg">
+    </a>
+    </p>
     
     ✨This demo is partial. We will release the whole model later. Stay tuned!✨
     """)
@@ -278,11 +322,14 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
     with gr.Row():
         with gr.Column():
             with gr.Tabs() as input_tabs:
-                with gr.Tab(label="Multiple Images", id=0) as multiimage_input_tab:
+                with gr.Tab(label="Input Video or Images", id=0) as multiimage_input_tab:
+                    input_video = gr.Video(label="Upload Video", interactive=True, height=300)
                     image_prompt = gr.Image(label="Image Prompt", format="png", visible=False, image_mode="RGBA", type="pil", height=300)
                     multiimage_prompt = gr.Gallery(label="Image Prompt", format="png", type="pil", height=300, columns=3)
                     gr.Markdown("""
                         Input different views of the object in separate images. 
+                        
+                        *NOTE: this is an experimental algorithm without training a specialized model. It may not produce the best results for all images, especially those having different poses or inconsistent details.*
                     """)
         
             with gr.Accordion(label="Generation Settings", open=False):
@@ -333,6 +380,11 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
     demo.load(start_session)
     demo.unload(end_session)
 
+    input_video.upload(
+        preprocess_videos,
+        inputs=[input_video],
+        outputs=[multiimage_prompt],
+    )
 
     multiimage_prompt.upload(
         preprocess_images,
@@ -345,10 +397,6 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
         inputs=[randomize_seed, seed],
         outputs=[seed],
     ).then(
-    #     lambda: [None, None, None, None],  # 先清空 video_output
-    #     inputs=[],
-    #     outputs=[video_output, model_output, download_glb, download_gs],
-    # ).then(
         generate_and_extract_glb,
         inputs=[multiimage_prompt, seed, ss_guidance_strength, ss_sampling_steps, slat_guidance_strength, slat_sampling_steps, multiimage_algo, mesh_simplify, texture_size],
         outputs=[output_buf, video_output, model_output, download_glb],
