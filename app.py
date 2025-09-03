@@ -29,6 +29,8 @@ def start_session(req: gr.Request):
 def end_session(req: gr.Request):
     user_dir = os.path.join(TMP_DIR, str(req.session_hash))
     shutil.rmtree(user_dir)
+
+@spaces.GPU
 def preprocess_image(image: Image.Image) -> Image.Image:
     """
     Preprocess the input image for 3D generation.
@@ -46,7 +48,7 @@ def preprocess_image(image: Image.Image) -> Image.Image:
     processed_image = pipeline.preprocess_image(image)
     return processed_image
 
-
+@spaces.GPU
 def preprocess_images(images: List[Tuple[Image.Image, str]]) -> List[Image.Image]:
     """
     Preprocess a list of input images for multi-image 3D generation.
