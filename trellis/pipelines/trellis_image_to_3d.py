@@ -232,17 +232,14 @@ class TrellisImageTo3DPipeline(Pipeline):
             if scale < 1:
                 input = input.resize((int(input.width * scale), int(input.height * scale)), Image.Resampling.LANCZOS)
                         
-            # # Get mask using BiRefNet
-            # mask = self._get_birefnet_mask(input)
+            # Get mask using BiRefNet
+            mask = self._get_birefnet_mask(input)
             
-            # # Convert input to RGBA and apply mask
-            # input_rgba = input.convert('RGBA')
-            # input_array = np.array(input_rgba)
-            # input_array[:, :, 3] = mask * 255  # Apply mask to alpha channel
-            # output = Image.fromarray(input_array)
-            if getattr(self, 'rembg_session', None) is None:
-                self.rembg_session = rembg.new_session('u2net')
-            output = rembg.remove(input, session=self.rembg_session)
+            # Convert input to RGBA and apply mask
+            input_rgba = input.convert('RGBA')
+            input_array = np.array(input_rgba)
+            input_array[:, :, 3] = mask * 255  # Apply mask to alpha channel
+            output = Image.fromarray(input_array)
 
         # Process the output image
         output_np = np.array(output)
@@ -341,7 +338,7 @@ class TrellisImageTo3DPipeline(Pipeline):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         
-        input_images = transform_image(image).unsqueeze(0).cpu()
+        input_images = transform_image(image).unsqueeze(0).to(self.device)
         
         with torch.no_grad():
             preds = self.birefnet_model(input_images)[-1].sigmoid().cpu()
@@ -793,11 +790,11 @@ class TrellisVGGTTo3DPipeline(TrellisImageTo3DPipeline):
         del new_pipeline.VGGT_model.point_head
         new_pipeline.VGGT_model.eval()
 
-        # new_pipeline.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
-        #     'ZhengPeng7/BiRefNet',
-        #     trust_remote_code=True
-        # ).cpu()
-        # new_pipeline.birefnet_model.eval()
+        new_pipeline.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
+            'ZhengPeng7/BiRefNet',
+            trust_remote_code=True
+        ).to(new_pipeline.device)
+        new_pipeline.birefnet_model.eval()
         
         new_pipeline.sparse_structure_sampler = getattr(samplers, args['sparse_structure_sampler']['name'])(**args['sparse_structure_sampler']['args'])
         new_pipeline.sparse_structure_sampler_params = args['sparse_structure_sampler']['params']
