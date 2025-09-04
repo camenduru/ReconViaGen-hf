@@ -8,7 +8,6 @@ from PIL import Image
 import trimesh
 import os
 import random
-import open3d as o3d
 import trellis.modules.sparse as sp
 from trellis.models.sparse_structure_vae import *
 from contextlib import contextmanager
@@ -657,32 +656,7 @@ class TrellisImageTo3DPipeline(Pipeline):
             sparse_cond = slat_cond = self.get_cond([image])
 
         torch.manual_seed(seed)
-        if init_mesh is not None:
-            mesh_o3d = o3d.geometry.TriangleMesh()
-            mesh_o3d.vertices = o3d.utility.Vector3dVector(init_mesh.vertices)
-            mesh_o3d.triangles = o3d.utility.Vector3iVector(init_mesh.faces)
-            if normalize_init_mesh:
-                vertices = np.asarray(mesh_o3d.vertices)
-                init_mesh = normalize_trimesh(init_mesh)
-                center = (vertices.max(axis=0) + vertices.min(axis=0)) / 2
-                vertices = vertices - center
-                diag = np.linalg.norm(vertices.max(axis=0) - vertices.min(axis=0))
-                vertices = vertices / diag
-                mesh_o3d.vertices = o3d.utility.Vector3dVector(vertices)
-            
-            vertices = np.clip(np.asarray(mesh_o3d.vertices), -0.5 + 1e-6, 0.5 - 1e-6)
-            mesh_o3d.vertices = o3d.utility.Vector3dVector(vertices)
-            
-            voxel_grid = o3d.geometry.VoxelGrid.create_from_triangle_mesh_within_bounds(
-                mesh_o3d,
-                voxel_size=1/64,
-                min_bound=(-0.5, -0.5, -0.5),
-                max_bound=(0.5, 0.5, 0.5)
-            )
-            
-            voxel_indices = np.array([voxel.grid_index for voxel in voxel_grid.get_voxels()])
-            coords = torch.cat([torch.zeros(len(voxel_indices), 1), torch.tensor(voxel_indices)], dim=1).int().to(self.device)
-        elif coords is not None:
+        if coords is not None:
             coords = coords
         else:
             coords = self.sample_sparse_structure(sparse_cond, num_samples, sparse_structure_sampler_params)
