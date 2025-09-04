@@ -18,6 +18,7 @@ from wheels.vggt.vggt.models.vggt import VGGT
 from typing import *
 from scipy.spatial.transform import Rotation
 from transformers import AutoModelForImageSegmentation
+import rembg
 
 def export_point_cloud(xyz, color):
     # Convert tensors to numpy arrays if needed
