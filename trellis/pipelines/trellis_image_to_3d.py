@@ -253,8 +253,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         bbox = np.min(bbox[:, 1]), np.min(bbox[:, 0]), np.max(bbox[:, 1]), np.max(bbox[:, 0])
         center = [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2]
         size = max(bbox[2] - bbox[0], bbox[3] - bbox[1])
-        size = int(size * 1.2)
-        # size = int(size * 1.1)
+        size = int(size * 1.1)
         height, width = alpha.shape
         if not recenter:
             center = [width / 2, height / 2]
