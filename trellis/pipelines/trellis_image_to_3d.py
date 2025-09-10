@@ -781,7 +781,7 @@ class TrellisVGGTTo3DPipeline(TrellisImageTo3DPipeline):
         new_pipeline.__dict__ = pipeline.__dict__
         args = pipeline._pretrained_args
         new_pipeline.VGGT_dtype = torch.float32
-        VGGT_model = VGGT.from_pretrained("Stable-X/vggt-object-v0-1")
+        VGGT_model = VGGT.from_pretrained("/content/ReconViaGen/models/vggt-object-v0-1")
         new_pipeline.VGGT_model = VGGT_model.to(new_pipeline.device)
         del new_pipeline.VGGT_model.depth_head
         del new_pipeline.VGGT_model.track_head
@@ -790,7 +790,7 @@ class TrellisVGGTTo3DPipeline(TrellisImageTo3DPipeline):
         new_pipeline.VGGT_model.eval()
 
         new_pipeline.birefnet_model = AutoModelForImageSegmentation.from_pretrained(
-            'ZhengPeng7/BiRefNet',
+            '/content/ReconViaGen/models/BiRefNet',
             trust_remote_code=True
         ).to(new_pipeline.device)
         new_pipeline.birefnet_model.eval()
