@@ -23,7 +23,6 @@ git+https://github.com/EasternJournalist/utils3d.git@9a4eb15e4021b67b12c460c7057
 xformers==0.0.27.post2
 spconv-cu120==2.3.6
 transformers==4.46.3
-gradio_litmodel3d==0.0.1
 pydantic==2.10.6
 einops==0.8.1
 huggingface_hub==0.25.0
