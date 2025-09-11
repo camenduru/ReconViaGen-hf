@@ -19,7 +19,6 @@ xatlas==0.0.9
 pyvista==0.44.2
 pymeshfix==0.17.0
 igraph==0.11.8
-git+https://github.com/EasternJournalist/utils3d.git@9a4eb15e4021b67b12c460c7057d642626897ec8
 xformers==0.0.27.post2
 spconv-cu120==2.3.6
 transformers==4.46.3
@@ -29,5 +28,6 @@ huggingface_hub==0.25.0
 lpips==0.1.4
 spaces==0.37.1
 https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.0.post2/flash_attn-2.7.0.post2+cu12torch2.4cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
-https://huggingface.co/spaces/JeffreyXiang/TRELLIS/resolve/main/wheels/diff_gaussian_rasterization-0.0.0-cp310-cp310-linux_x86_64.whl?download=true
-https://huggingface.co/spaces/JeffreyXiang/TRELLIS/resolve/main/wheels/nvdiffrast-0.3.3-cp310-cp310-linux_x86_64.whl?download=true
+https://huggingface.co/spaces/JeffreyXiang/TRELLIS/resolve/main/wheels/diff_gaussian_rasterization-0.0.0-cp310-cp310-linux_x86_64.whl
+https://huggingface.co/spaces/JeffreyXiang/TRELLIS/resolve/main/wheels/nvdiffrast-0.3.3-cp310-cp310-linux_x86_64.whl
+https://github.com/camenduru/wheels/releases/download/2.4.0%2Bcu121/utils3d-0.0.2-py3-none-any.whl
